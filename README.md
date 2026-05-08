@@ -79,7 +79,7 @@ OPENAI_API_KEY=your-openai-api-key
 FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
 ```
 
-**Important**: You must set at least one LLM API key (e.g. `OPENAI_API_KEY`, `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, or `DEEPSEEK_API_KEY`) for the hedge fund to work. 
+**Important**: You must set at least one LLM API key (e.g. `OPENAI_API_KEY`, `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, or `DEEPSEEK_API_KEY`) for API-hosted LLMs. For Codex CLI with a ChatGPT subscription, run `codex login` once and select the "Codex CLI (ChatGPT subscription)" model; no OpenAI API key is required for that LLM path. This fork expects the `codex-langchain-bridge` package to be installed or checked out next to this repo as `../codex-langchain-bridge`.
 
 ## How to Run
 
@@ -110,6 +110,13 @@ You can also specify a `--ollama` flag to run the AI hedge fund using local LLMs
 
 ```bash
 poetry run python src/main.py --ticker AAPL,MSFT,NVDA --ollama
+```
+
+You can use Codex CLI authenticated with a ChatGPT subscription:
+
+```bash
+codex login
+poetry run python src/main.py --tickers AAPL,MSFT,NVDA --model codex:gpt-5.5
 ```
 
 You can optionally specify the start and end dates to make decisions over a specific time period.

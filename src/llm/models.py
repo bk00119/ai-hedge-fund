@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 from langchain_anthropic import ChatAnthropic
 from langchain_deepseek import ChatDeepSeek
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -12,6 +13,22 @@ from enum import Enum
 from pydantic import BaseModel
 from typing import Tuple, List
 from pathlib import Path
+
+
+def _load_codex_chat_model():
+    """Load the sibling local bridge package without requiring publication."""
+    try:
+        from codex_langchain_bridge import CodexChatModel
+
+        return CodexChatModel
+    except ImportError:
+        bridge_src = Path(__file__).resolve().parents[3] / "codex-langchain-bridge" / "src"
+        if bridge_src.exists():
+            sys.path.insert(0, str(bridge_src))
+            from codex_langchain_bridge import CodexChatModel
+
+            return CodexChatModel
+        raise
 
 
 class ModelProvider(str, Enum):
@@ -30,6 +47,7 @@ class ModelProvider(str, Enum):
     OPENROUTER = "OpenRouter"
     GIGACHAT = "GigaChat"
     AZURE_OPENAI = "Azure OpenAI"
+    CODEX = "Codex"
     XAI = "xAI"
 
 
@@ -250,6 +268,10 @@ def get_model(model_name: str, model_provider: ModelProvider, api_keys: dict = N
             print(f"Azure Deployment Name Error: Please make sure AZURE_OPENAI_DEPLOYMENT_NAME is set in your .env file.")
             raise ValueError("Azure OpenAI deployment name not found.  Please make sure AZURE_OPENAI_DEPLOYMENT_NAME is set in your .env file.")
         return AzureChatOpenAI(azure_endpoint=azure_endpoint, azure_deployment=azure_deployment_name, api_key=api_key, api_version="2024-10-21")
+    elif model_provider == ModelProvider.CODEX:
+        CodexChatModel = _load_codex_chat_model()
+        codex_model_name = model_name.removeprefix("codex:")
+        return CodexChatModel(model_name=codex_model_name)
     else:
         raise ValueError(
             f"Unsupported model provider: {model_provider}. "
